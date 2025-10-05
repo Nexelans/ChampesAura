@@ -1,5 +1,5 @@
 # Fichier: render.yaml
-# Définit l'infrastructure pour Render.com
+# Définit l'infrastructure pour Render.com, optimisé pour le plan Professional.
 
 services:
   # Service Web pour l'API FastAPI
@@ -7,11 +7,14 @@ services:
     name: golf-api
     runtime: python
     region: frankfurt # ou une autre région, ex: oregon
-    plan: free # Plan gratuit de Render
+    plan: professional # Plan mis à jour
     # Indique à Render comment installer les dépendances
     buildCommand: "poetry install --no-root"
-    # La commande de migration est maintenant combinée avec la commande de démarrage
-    startCommand: "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    # Commande de pré-déploiement pour les migrations de base de données
+    preDeployCommand: "alembic upgrade head"
+    # Commande pour lancer l'application avec Uvicorn
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: / # Chemin pour vérifier que l'application est bien démarrée
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -23,6 +26,6 @@ services:
 databases:
   # Base de données PostgreSQL
   - name: golf-db
-    plan: free # Plan gratuit de Render
+    plan: professional # Plan mis à jour pour la base de données
     # postgresqlVersion: 15 # Vous pouvez spécifier une version si besoin
 
