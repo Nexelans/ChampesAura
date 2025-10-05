@@ -1,5 +1,5 @@
 # Fichier: render.yaml
-# Définit l'infrastructure pour Render.com, optimisé pour le plan Professional.
+# Définit l'infrastructure pour Render.com, optimisé pour le plan Pro.
 
 services:
   # Service Web pour l'API FastAPI
@@ -7,7 +7,7 @@ services:
     name: golf-api
     runtime: python
     region: frankfurt # ou une autre région, ex: oregon
-    plan: professional # Plan mis à jour
+    plan: pro # Plan mis à jour vers le slug correct
     # Indique à Render comment installer les dépendances
     buildCommand: "poetry install --no-root"
     # Commande de pré-déploiement pour les migrations de base de données
@@ -26,6 +26,6 @@ services:
 databases:
   # Base de données PostgreSQL
   - name: golf-db
-    plan: professional # Plan mis à jour pour la base de données
+    plan: pro # Plan mis à jour vers le slug correct
     # postgresqlVersion: 15 # Vous pouvez spécifier une version si besoin
 
