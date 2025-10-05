@@ -10,11 +10,8 @@ services:
     plan: free # Plan gratuit de Render
     # Indique à Render comment installer les dépendances
     buildCommand: "poetry install --no-root"
-    # NOUVEAU: Commande à exécuter avant de démarrer le serveur
-    # Cela appliquera les migrations de base de données.
-    preDeployCommand: "alembic upgrade head"
-    # Commande pour lancer l'application avec Uvicorn
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    # La commande de migration est maintenant combinée avec la commande de démarrage
+    startCommand: "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
