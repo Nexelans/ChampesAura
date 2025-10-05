@@ -1,29 +1,29 @@
 # Fichier: render.yaml
+# Version corrigée avec les sections 'databases' et 'services' séparées.
 
-# Fichier de configuration "Blueprint" pour Render.com
-# Ce fichier décrit tous les services nécessaires pour faire tourner l'application.
+# Les bases de données sont définies dans leur propre section de premier niveau.
+databases:
+  # Chaque base de données commence par un tiret "-".
+  - name: golf-db          # Le nom de notre service de base de données.
+    databaseName: golf_app_db # Le nom de la base de données réelle.
+    user: golf_app_user   # L'utilisateur pour cette base.
+    plan: free            # Le plan gratuit de Render.
 
+# Les services applicatifs (notre API FastAPI) sont dans cette section.
 services:
-  # 1. Le service de base de données PostgreSQL
-  - name: golf-db
-    type: psql # Assurez-vous que cette ligne est exactement comme ceci, sans fautes de frappe et bien indentée.
-    databaseName: golf_app_db
-    user: golf_app_user
-    plan: free # Le plan gratuit de Render est parfait pour commencer
-    # Render va automatiquement gérer les sauvegardes et la sécurité.
-
-  # 2. Le service web pour notre application FastAPI
+  # Notre service web.
   - name: golf-api
     type: web
     runtime: python
     plan: free
-    buildCommand: "pip install -r requirements.txt" # Commande pour installer les dépendances (voir note ci-dessous)
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT" # Commande pour lancer l'application
+    # Utilisation de Poetry, qui est défini dans pyproject.toml.
+    buildCommand: "poetry install"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
-        value: "3.11" # Spécifier une version de Python moderne
+        value: "3.11"
       - key: DATABASE_URL
         fromDatabase:
-          name: golf-db # Le nom du service de base de données défini ci-dessus
-          property: connectionString # Render injectera l'URL de connexion de la base de données
+          name: golf-db # Cette valeur doit correspondre au 'name' de la base de données ci-dessus.
+          property: connectionString # Render injectera l'URL de connexion.
 
