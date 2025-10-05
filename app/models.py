@@ -1,5 +1,6 @@
 # Fichier: app/models.py
-
+# Définit les tables et les relations de la base de données avec SQLAlchemy.
+import datetime
 from sqlalchemy import (
     Column,
     Integer,
@@ -8,55 +9,76 @@ from sqlalchemy import (
     Date,
     ForeignKey,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped
+
 from .database import Base
+
+# La table d'association plusieurs-à-plusieurs a été supprimée.
+
+class Player(Base):
+    __tablename__ = "players"
+
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    first_name: Mapped[str] = Column(String, index=True)
+    last_name: Mapped[str] = Column(String, index=True)
+    email: Mapped[str] = Column(String, unique=True, index=True)
+    handicap: Mapped[float] = Column(Float, index=True)
+
+    # NOUVEAU : Clé étrangère vers l'équipe du joueur.
+    # Un joueur appartient à une seule équipe (ou à aucune).
+    team_id: Mapped[int] = Column(Integer, ForeignKey("teams.id"), nullable=True)
+
+    # Relation vers les scores du joueur (inchangée)
+    scores: Mapped["Score"] = relationship("Score", back_populates="player")
+    
+    # MIS A JOUR : Relation vers l'équipe du joueur.
+    team: Mapped["Team"] = relationship("Team", back_populates="members")
+    
+    # La relation "captained_team" est supprimée d'ici pour simplifier. 
+    # On sait si un joueur est capitaine via la table Team.
+
+
+class Team(Base):
+    __tablename__ = "teams"
+
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    name: Mapped[str] = Column(String, index=True, unique=True)
+    
+    # Clé étrangère vers le joueur qui est le capitaine.
+    # unique=True garantit qu'un joueur ne peut être capitaine que d'une seule équipe.
+    captain_id: Mapped[int] = Column(Integer, ForeignKey("players.id"), unique=True)
+
+    # Relation vers l'objet Player du capitaine.
+    # C'est une relation simple, sans retour, pour récupérer les infos du capitaine.
+    captain: Mapped["Player"] = relationship("Player", foreign_keys=[captain_id])
+    
+    # MIS A JOUR : Relation vers la liste des joueurs membres de l'équipe.
+    members: Mapped["Player"] = relationship(
+        "Player", back_populates="team", foreign_keys="[Player.team_id]"
+    )
 
 
 class Competition(Base):
-    """
-    Represents a golf competition.
-    """
     __tablename__ = "competitions"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)
-    date = Column(Date, nullable=False)
-    location = Column(String)
-    format = Column(String)  # e.g., "Stroke Play", "Stableford"
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    name: Mapped[str] = Column(String, index=True)
+    date: Mapped[datetime.date] = Column(Date, index=True)
 
-    # Relationship to scores
-    scores = relationship("Score", back_populates="competition")
-
-
-class Player(Base):
-    """
-    Represents a golf player.
-    """
-    __tablename__ = "players"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True, nullable=False)
-    handicap = Column(Float, nullable=False)
-
-    # Relationship to scores
-    scores = relationship("Score", back_populates="player")
+    # Relation vers les scores de la compétition (inchangée)
+    scores: Mapped["Score"] = relationship("Score", back_populates="competition")
 
 
 class Score(Base):
-    """
-    Represents a player's score in a specific competition.
-    """
     __tablename__ = "scores"
 
-    id = Column(Integer, primary_key=True, index=True)
-    gross_score = Column(Integer, nullable=False)
-    net_score = Column(Float, nullable=False)
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    points: Mapped[int] = Column(Integer)
+    
+    player_id: Mapped[int] = Column(Integer, ForeignKey("players.id"))
+    competition_id: Mapped[int] = Column(Integer, ForeignKey("competitions.id"))
 
-    # Foreign keys
-    player_id = Column(Integer, ForeignKey("players.id"), nullable=False)
-    competition_id = Column(Integer, ForeignKey("competitions.id"), nullable=False)
-
-    # Relationships
-    player = relationship("Player", back_populates="scores")
-    competition = relationship("Competition", back_populates="scores")
+    # Relations vers les objets Player et Competition (inchangées)
+    player: Mapped["Player"] = relationship("Player", back_populates="scores")
+    competition: Mapped["Competition"] = relationship("Competition", back_populates="scores")
 
