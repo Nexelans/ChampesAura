@@ -1,18 +1,28 @@
-[tool.poetry]
-name = "golf-competition-app"
-version = "0.1.0"
-description = "A web application for managing golf competitions."
-authors = ["Your Name <you@example.com>"]
+# Fichier: render.yaml
 
-[tool.poetry.dependencies]
-python = "^3.9"
-fastapi = "^0.111.0"
-uvicorn = {extras = ["standard"], version = "^0.29.0"}
-sqlalchemy = "^2.0.29"
-pydantic = "^2.7.1"
-# Ajout du driver pour PostgreSQL
-psycopg2-binary = "^2.9.9"
+# Fichier de configuration "Blueprint" pour Render.com
+# Ce fichier décrit tous les services nécessaires pour faire tourner l'application.
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+services:
+  # 1. Le service de base de données PostgreSQL
+  - name: golf-db
+    type: psql
+    databaseName: golf_app_db
+    user: golf_app_user
+    plan: free # Le plan gratuit de Render est parfait pour commencer
+    # Render va automatiquement gérer les sauvegardes et la sécurité.
+
+  # 2. Le service web pour notre application FastAPI
+  - name: golf-api
+    type: web
+    runtime: python
+    plan: free
+    buildCommand: "poetry install" # Commande pour installer les dépendances
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT" # Commande pour lancer l'application
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11" # Spécifier une version de Python moderne
+      - key: DATABASE_URL
+        fromDatabase:
+          name: golf-db # Le nom du service de base de données défini ci-dessus
+          property: connectionString # Render injectera l'URL de connexion de la base de données
