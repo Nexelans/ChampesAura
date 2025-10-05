@@ -25,7 +25,7 @@ class Player(Base):
 
     team_id: Mapped[int] = Column(Integer, ForeignKey("teams.id"), nullable=True)
 
-    scores: Mapped["Score"] = relationship("Score", back_populates="player")
+    scores: Mapped[list["Score"]] = relationship("Score", back_populates="player")
     
     # CORRECTION : Ajout de l'argument 'foreign_keys' pour lever l'ambiguïté.
     team: Mapped["Team"] = relationship(
@@ -57,7 +57,7 @@ class Competition(Base):
     name: Mapped[str] = Column(String, index=True)
     date: Mapped[datetime.date] = Column(Date, index=True)
 
-    scores: Mapped["Score"] = relationship("Score", back_populates="competition")
+    scores: Mapped[list["Score"]] = relationship("Score", back_populates="competition")
 
 
 class Score(Base):
@@ -71,17 +71,3 @@ class Score(Base):
 
     player: Mapped["Player"] = relationship("Player", back_populates="scores")
     competition: Mapped["Competition"] = relationship("Competition", back_populates="scores")
-```
-
-### Ce que j'ai changé :
-
-Dans le fichier `app/models.py`, sur le modèle `Player`, j'ai modifié la relation `team` pour y inclure `foreign_keys=[team_id]`.
-```python
-# Avant :
-# team: Mapped["Team"] = relationship("Team", back_populates="members")
-
-# Après :
-team: Mapped["Team"] = relationship(
-    "Team", back_populates="members", foreign_keys=[team_id]
-)
-
