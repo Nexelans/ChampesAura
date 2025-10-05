@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from . import models, crud, schemas
 from .database import SessionLocal, engine, get_db
-from .routers import players, competitions  # <--- NOUVEL IMPORT
+from .routers import players, competitions, scores  # <--- NOUVEL IMPORT
 
 # Crée les tables dans la base de données (si elles n'existent pas)
 # Attention : dans un environnement de production plus avancé, on utiliserait Alembic pour les migrations.
@@ -20,7 +20,8 @@ app = FastAPI(
 
 # Inclusion des routeurs
 app.include_router(players.router)
-app.include_router(competitions.router) # <--- NOUVELLE LIGNE
+app.include_router(competitions.router)
+app.include_router(scores.router) # <--- NOUVELLE LIGNE
 
 
 @app.get("/", tags=["Root"])
@@ -28,5 +29,4 @@ def read_root():
     """
     Endpoint racine de l'API.
     """
-    return {"message": "Bienvenue sur l'API de gestion de compétitions de golf !"}
-
+    return {"message": "Bienvenue sur l'API de gestion de compétitions de golf !!"}
