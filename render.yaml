@@ -17,12 +17,13 @@ services:
     runtime: python
     plan: free
     # Utilisation de Poetry, qui est défini dans pyproject.toml.
-    buildCommand: "poetry install"
+    buildCommand: "poetry install --no-root" # CORRECTION: Ajout de l'option --no-root
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
-        value: "3.11.8" # CORRECTION: Spécifier une version complète (major.minor.patch)
+        value: "3.11.8"
       - key: DATABASE_URL
         fromDatabase:
           name: golf-db # Cette valeur doit correspondre au 'name' de la base de données ci-dessus.
           property: connectionString # Render injectera l'URL de connexion.
+
