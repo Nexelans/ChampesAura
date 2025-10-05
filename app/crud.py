@@ -2,6 +2,7 @@
 # Contient les fonctions pour interagir avec la base de données.
 
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from . import models, schemas
 
@@ -44,8 +45,37 @@ def create_player(db: Session, player: schemas.PlayerCreate):
     db.refresh(db_player)
     return db_player
 
-# --- Fonctions CRUD pour les Compétitions (à venir) ---
-# ...
+
+# --- Fonctions CRUD pour les Compétitions (Competition) ---
+
+def get_competition(db: Session, competition_id: int):
+    """
+    Récupère une compétition par son ID.
+    """
+    return db.query(models.Competition).filter(models.Competition.id == competition_id).first()
+
+
+def get_competitions(db: Session, skip: int = 0, limit: int = 100):
+    """
+    Récupère une liste de compétitions avec pagination.
+    """
+    return db.query(models.Competition).offset(skip).limit(limit).all()
+
+
+def create_competition(db: Session, competition: schemas.CompetitionCreate):
+    """
+    Crée une nouvelle compétition.
+    """
+    db_competition = models.Competition(
+        name=competition.name,
+        date=competition.date
+    )
+    db.add(db_competition)
+    db.commit()
+    db.refresh(db_competition)
+    return db_competition
+
 
 # --- Fonctions CRUD pour les Scores (à venir) ---
 # ...
+
