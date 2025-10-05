@@ -76,6 +76,26 @@ def create_competition(db: Session, competition: schemas.CompetitionCreate):
     return db_competition
 
 
-# --- Fonctions CRUD pour les Scores (à venir) ---
-# ...
+# --- Fonctions CRUD pour les Scores (Score) ---
+
+def get_scores(db: Session, skip: int = 0, limit: int = 100):
+    """
+    Récupère une liste de tous les scores.
+    """
+    return db.query(models.Score).offset(skip).limit(limit).all()
+
+
+def create_score(db: Session, score: schemas.ScoreCreate, player_id: int, competition_id: int):
+    """
+    Crée un nouveau score pour un joueur dans une compétition.
+    """
+    db_score = models.Score(
+        points=score.points,
+        player_id=player_id,
+        competition_id=competition_id
+    )
+    db.add(db_score)
+    db.commit()
+    db.refresh(db_score)
+    return db_score
 
