@@ -1,29 +1,31 @@
 # Fichier: render.yaml
-# Version corrigée avec les sections 'databases' et 'services' séparées.
+# Définit l'infrastructure pour Render.com
 
-# Les bases de données sont définies dans leur propre section de premier niveau.
-databases:
-  # Chaque base de données commence par un tiret "-".
-  - name: golf-db          # Le nom de notre service de base de données.
-    databaseName: golf_app_db # Le nom de la base de données réelle.
-    user: golf_app_user   # L'utilisateur pour cette base.
-    plan: free            # Le plan gratuit de Render.
-
-# Les services applicatifs (notre API FastAPI) sont dans cette section.
 services:
-  # Notre service web.
-  - name: golf-api
-    type: web
+  # Service Web pour l'API FastAPI
+  - type: web
+    name: golf-api
     runtime: python
-    plan: free
-    # Utilisation de Poetry, qui est défini dans pyproject.toml.
-    buildCommand: "poetry install --no-root" # CORRECTION: Ajout de l'option --no-root
+    region: frankfurt # ou une autre région, ex: oregon
+    plan: free # Plan gratuit de Render
+    # Indique à Render comment installer les dépendances
+    buildCommand: "poetry install --no-root"
+    # NOUVEAU: Commande à exécuter avant de démarrer le serveur
+    # Cela appliquera les migrations de base de données.
+    preDeployCommand: "alembic upgrade head"
+    # Commande pour lancer l'application avec Uvicorn
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.11.8"
       - key: DATABASE_URL
         fromDatabase:
-          name: golf-db # Cette valeur doit correspondre au 'name' de la base de données ci-dessus.
-          property: connectionString # Render injectera l'URL de connexion.
+          name: golf-db # Doit correspondre au nom de la base de données ci-dessous
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.11.8
+
+databases:
+  # Base de données PostgreSQL
+  - name: golf-db
+    plan: free # Plan gratuit de Render
+    # postgresqlVersion: 15 # Vous pouvez spécifier une version si besoin
 
