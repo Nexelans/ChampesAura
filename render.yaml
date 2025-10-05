@@ -6,7 +6,7 @@
 services:
   # 1. Le service de base de données PostgreSQL
   - name: golf-db
-    type: psql
+    type: psql # Assurez-vous que cette ligne est exactement comme ceci, sans fautes de frappe et bien indentée.
     databaseName: golf_app_db
     user: golf_app_user
     plan: free # Le plan gratuit de Render est parfait pour commencer
@@ -17,7 +17,7 @@ services:
     type: web
     runtime: python
     plan: free
-    buildCommand: "poetry install" # Commande pour installer les dépendances
+    buildCommand: "pip install -r requirements.txt" # Commande pour installer les dépendances (voir note ci-dessous)
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT" # Commande pour lancer l'application
     envVars:
       - key: PYTHON_VERSION
@@ -26,3 +26,4 @@ services:
         fromDatabase:
           name: golf-db # Le nom du service de base de données défini ci-dessus
           property: connectionString # Render injectera l'URL de connexion de la base de données
+
