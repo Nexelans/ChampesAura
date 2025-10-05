@@ -1,35 +1,31 @@
 # Fichier: app/main.py
+# Point d'entrée de l'application FastAPI (version mise à jour).
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-from typing import List
 
-from . import models, schemas
+from . import models, crud, schemas
 from .database import SessionLocal, engine, get_db
+from .routers import players  # <--- NOUVEL IMPORT
 
-# Create all database tables
+# Crée les tables dans la base de données (si elles n'existent pas)
+# Attention : dans un environnement de production plus avancé, on utiliserait Alembic pour les migrations.
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="Gestionnaire de Compétitions de Golf",
-    description="Une application pour gérer les joueurs, les compétitions et les scores.",
-    version="0.1.0"
+    title="Gestion de Compétitions de Golf",
+    description="Une API pour gérer les joueurs, les compétitions et les scores de golf.",
+    version="0.1.0",
 )
+
+# Inclusion du routeur pour les joueurs
+app.include_router(players.router) # <--- NOUVELLE LIGNE
 
 
 @app.get("/", tags=["Root"])
 def read_root():
     """
-    Welcome endpoint.
+    Endpoint racine de l'API.
     """
-    return {"message": "Bienvenue sur l'application de gestion de compétitions de golf !"}
-
-
-# --- CRUD Operations and Endpoints will be added here ---
-
-# Example: Placeholder for creating a player
-# @app.post("/players/", response_model=schemas.Player, tags=["Players"])
-# def create_player(player: schemas.PlayerCreate, db: Session = Depends(get_db)):
-#     # Logic to create a player will go here
-#     return {"message": "Player creation logic to be implemented"}
+    return {"message": "Bienvenue sur l'API de gestion de compétitions de golf !"}
 
